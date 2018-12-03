@@ -6,9 +6,6 @@ import itemrender.ItemRenderMod;
 import itemrender.client.rendering.FBOHelper;
 import itemrender.client.rendering.Renderer;
 
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,14 +13,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.border.EmptyBorder;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.entity.RenderItem;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.Language;
 import net.minecraft.client.resources.LanguageManager;
@@ -31,9 +23,9 @@ import net.minecraft.client.settings.GameSettings;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.client.FMLClientHandler;
 import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry.UniqueIdentifier;
 import org.apache.logging.log4j.Logger;
 
 public class ExportUtils
@@ -74,18 +66,20 @@ public class ExportUtils
   
   private String getItemOwner(ItemStack itemStack)
   {
-    ResourceLocation registryName = itemStack.getItem().getRegistryName();
-    return registryName == null ? "unnamed" : registryName.getResourceDomain();
+    GameRegistry.UniqueIdentifier uniqueIdentity = GameRegistry.findUniqueIdentifierFor(itemStack.getItem());
+    return uniqueIdentity == null ? "unnamed" : uniqueIdentity.modId;
   }
+  
   public void exportMods()
     throws IOException
   {
     Minecraft minecraft = FMLClientHandler.instance().getClient();
+    Language lang = minecraft.getLanguageManager().getCurrentLanguage();
     this.itemDataList.clear();
     List<String> modList = new ArrayList();
     
     Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-    for (ItemStack itemStack : ItemList.items) {
+    for (ItemStack itemStack : ItemList.items1) {
       if ((itemStack != null) && (
         (!getItemOwner(itemStack).equals("minecraft")) || (ItemRenderMod.exportVanillaItems)))
       {
@@ -100,7 +94,7 @@ public class ExportUtils
         }
       }
     }
-    minecraft.getLanguageManager().setCurrentLanguage(new Language("zh_CN", "ä¸­å›½", "ç®€ä½“ä¸­æ–‡", false));
+    minecraft.getLanguageManager().setCurrentLanguage(new Language("zh_CN", "ÖÐ¹ú", "¼òÌåÖÐÎÄ", false));
     minecraft.gameSettings.language = "zh_CN";
     minecraft.refreshResources();
     minecraft.gameSettings.saveOptions();
@@ -141,6 +135,13 @@ public class ExportUtils
       }
       pw.close();
     }
+    
+    minecraft.getLanguageManager().setCurrentLanguage(lang);
+    minecraft.gameSettings.language = lang.getLanguageCode();
+    minecraft.refreshResources();
+    minecraft.fontRendererObj.setUnicodeFlag(false);
+    minecraft.gameSettings.saveOptions();
+    
   }
   
 
