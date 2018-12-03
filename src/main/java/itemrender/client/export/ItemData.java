@@ -35,7 +35,7 @@ public class ItemData
     }
     this.name = null;
     this.englishName = null;
-    this.registerName = itemStack.getItem().getRegistryName();
+    this.registerName = itemStack.getItem().getRegistryName().toString();
     List<String> list = new ArrayList<String>();
     metadata=itemStack.getItemDamage();
     if(!isEmpty(itemStack)){
@@ -77,7 +77,7 @@ public class ItemData
       {
           return true;
       }
-      else if (stack.getItem() != null && stack.getItem() != Item.getItemFromBlock(Blocks.air))
+      else if (stack.getItem() != null && stack.getItem() != Item.getItemFromBlock(Blocks.AIR))
       {
           if (stack.stackSize <= 0)
           {

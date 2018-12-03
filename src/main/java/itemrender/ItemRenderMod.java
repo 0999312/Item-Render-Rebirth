@@ -12,11 +12,11 @@ import itemrender.client.keybind.KeybindWarn;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.config.Configuration;
 import net.minecraftforge.common.config.Property;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent;
 import net.minecraftforge.fml.client.event.ConfigChangedEvent.OnConfigChangedEvent;
-import net.minecraftforge.fml.common.FMLCommonHandler;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventHandler;
 import net.minecraftforge.fml.common.Mod.Instance;
@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.lwjgl.opengl.ContextCapabilities;
 import org.lwjgl.opengl.GLContext;
 
-@Mod(modid="ItemRender", name="Item Render", version="3.0", dependencies="required-after:Forge@[10.12.2.1147,);", guiFactory="itemrender.ItemRenderGuiFactory", acceptedMinecraftVersions="[1.8,1.8.9]")
+@Mod(modid="ItemRender", name="Item Render", version="3.0", dependencies="required-after:Forge@[10.12.2.1147,);", guiFactory="itemrender.ItemRenderGuiFactory", acceptedMinecraftVersions="[1.9, 1.10.2]")
 public class ItemRenderMod
 {
   public static final String MODID = "ItemRender";
@@ -102,25 +102,25 @@ public class ItemRenderMod
       this.log.error("Item Render is a client-only mod. Please remove this mod and restart your server.");
       return;
     }
-    FMLCommonHandler.instance().bus().register(instance);
-    FMLCommonHandler.instance().bus().register(this.renderTickHandler);
+    MinecraftForge.EVENT_BUS.register(instance);
+    MinecraftForge.EVENT_BUS.register(this.renderTickHandler);
     if (gl32_enabled)
     {
       ExportUtils.INSTANCE = new ExportUtils();
       
       KeybindRenderInventoryBlock defaultRender = new KeybindRenderInventoryBlock(mainBlockSize, "", 26, "Render Block (" + mainBlockSize + ")");
       RenderTickHandler.keybindToRender = defaultRender;
-      FMLCommonHandler.instance().bus().register(new KeybindRenderEntity(mainEntitySize, "", 39, "Render Entity (" + mainEntitySize + ")"));
-      FMLCommonHandler.instance().bus().register(new KeybindRenderEntity(gridEntitySize, "_grid", 40, "Render Entity (" + gridEntitySize + ")"));
-      FMLCommonHandler.instance().bus().register(defaultRender);
-      FMLCommonHandler.instance().bus().register(new KeybindRenderInventoryBlock(gridBlockSize, "_grid", 27, "Render Block (" + gridBlockSize + ")"));
-      FMLCommonHandler.instance().bus().register(new KeybindToggleRender());
-      FMLCommonHandler.instance().bus().register(new KeybindRenderCurrentPlayer(playerSize));
-      FMLCommonHandler.instance().bus().register(new KeybindExport());
+      MinecraftForge.EVENT_BUS.register(new KeybindRenderEntity(mainEntitySize, "", 39, "Render Entity (" + mainEntitySize + ")"));
+      MinecraftForge.EVENT_BUS.register(new KeybindRenderEntity(gridEntitySize, "_grid", 40, "Render Entity (" + gridEntitySize + ")"));
+      MinecraftForge.EVENT_BUS.register(defaultRender);
+      MinecraftForge.EVENT_BUS.register(new KeybindRenderInventoryBlock(gridBlockSize, "_grid", 27, "Render Block (" + gridBlockSize + ")"));
+      MinecraftForge.EVENT_BUS.register(new KeybindToggleRender());
+      MinecraftForge.EVENT_BUS.register(new KeybindRenderCurrentPlayer(playerSize));
+      MinecraftForge.EVENT_BUS.register(new KeybindExport());
     }
     else
     {
-      FMLCommonHandler.instance().bus().register(new KeybindWarn());
+      MinecraftForge.EVENT_BUS.register(new KeybindWarn());
       this.log.error("[Item Render] OpenGL Error, please upgrade your drivers or system.");
     }
   }
@@ -136,7 +136,7 @@ public class ItemRenderMod
   @SubscribeEvent
   public void onConfigChanged(ConfigChangedEvent.OnConfigChangedEvent event)
   {
-    if (event.modID.equals("ItemRender")) {
+    if (event.getModID().equals("ItemRender")) {
       syncConfig();
     }
   }

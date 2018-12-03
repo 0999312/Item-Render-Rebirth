@@ -8,17 +8,17 @@ import java.util.LinkedList;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemModelMesher;
-import net.minecraft.client.renderer.entity.RenderItem;
-import net.minecraft.client.resources.model.IBakedModel;
+import net.minecraft.client.renderer.RenderItem;
+import net.minecraft.client.renderer.block.model.IBakedModel;
 import net.minecraft.item.EnumRarity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.text.TextFormatting;
 
 public class ItemList
 {
-  public static volatile List<ItemStack> items1 = new ArrayList();
-  public static volatile ListMultimap<Item, ItemStack> itemMap1 = ArrayListMultimap.create();
+  public static volatile List<ItemStack> items = new ArrayList();
+  public static volatile ListMultimap<Item, ItemStack> itemMap = ArrayListMultimap.create();
   
   private static void damageSearch(Item item, List<ItemStack> permutations)
   {
@@ -57,7 +57,7 @@ public class ItemList
       }
       sb.append(name);
     }
-    return EnumChatFormatting.getTextWithoutFormattingCodes(sb.toString());
+    return TextFormatting.getTextWithoutFormattingCodes(sb.toString());
   }
   
   public static List<String> itemDisplayNameMultiline(ItemStack itemstack)
@@ -89,7 +89,7 @@ public class ItemList
     LinkedList<ItemStack> items = new LinkedList();
     LinkedList<ItemStack> permutations = new LinkedList();
     ListMultimap<Item, ItemStack> itemMap = ArrayListMultimap.create();
-    for (Item item : Item.itemRegistry) {
+    for (Item item : Item.REGISTRY) {
       if (item != null) {
         try
         {
@@ -109,7 +109,7 @@ public class ItemList
         }
       }
     }
-    items1 = items;
-    itemMap1 = itemMap;
+    items = items;
+    itemMap = itemMap;
   }
 }
