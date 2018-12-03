@@ -12,40 +12,40 @@ package itemrender;
 import net.minecraft.command.CommandBase;
 import net.minecraft.command.CommandException;
 import net.minecraft.command.ICommandSender;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.text.TextComponentString;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.ChatComponentText;
+import net.minecraft.util.EnumChatFormatting;
 
 public class CommandItemRender extends CommandBase {
 
+
     @Override
-    public String getName() {
+    public String getCommandName() {
         return "itemrender";
     }
 
     @Override
-    public String getUsage(ICommandSender sender) {
+    public String getCommandUsage(ICommandSender sender) {
         return "/itemrender scale [value]";
     }
 
     @Override
-    public void execute(MinecraftServer server, ICommandSender sender, String[] args) throws CommandException {
+    public void processCommand(ICommandSender sender, String[] args) throws CommandException {
         if (args.length == 0) {
-            sender.sendMessage(new TextComponentString(TextFormatting.RED + "/itemrender scale [value]"));
-            sender.sendMessage(new TextComponentString(TextFormatting.AQUA + "Execute this command to control entity/item rendering scale."));
-            sender.sendMessage(new TextComponentString(TextFormatting.AQUA + "Scale Range: (0.0, 2.0]. Default: 1.0. Current: " + ItemRenderMod.renderScale));
+            sender.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "/itemrender scale [value]"));
+            sender.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "Execute this command to control entity rendering scale."));
+            sender.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "Scale Range: (0.0, 2.0]. Default: 1.0. Current: " + ItemRenderMod.renderScale));
         } else if (args[0].equalsIgnoreCase("scale")) {
             if (args.length == 2) {
                 float value = Float.valueOf(args[1]);
                 if (value > 0.0F && value <= 2.0F) {
                     ItemRenderMod.renderScale = Float.valueOf(args[1]);
-                    sender.sendMessage(new TextComponentString(TextFormatting.GREEN + "Scale: " + value));
+                    sender.addChatMessage(new ChatComponentText(EnumChatFormatting.GREEN + "Scale: " + value));
                 } else {
-                    sender.sendMessage(new TextComponentString(TextFormatting.RED + "Scale Range: (0.0, 2.0]"));
+                    sender.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Scale Range: (0.0, 2.0]"));
                 }
             } else {
-                sender.sendMessage(new TextComponentString(TextFormatting.AQUA + "Current Scale: " + ItemRenderMod.renderScale));
-                sender.sendMessage(new TextComponentString(TextFormatting.RED + "Execute /itemrender scale [value] to control entity/item rendering " + TextFormatting.RED + "scale."));
+                sender.addChatMessage(new ChatComponentText(EnumChatFormatting.AQUA + "Current Scale: " + ItemRenderMod.renderScale));
+                sender.addChatMessage(new ChatComponentText(EnumChatFormatting.RED + "Execute /itemrender scale [value] to control entity rendering " + EnumChatFormatting.RED + "scale."));
             }
         } else
             throw new CommandException("/itemrender scale [value]", 0);

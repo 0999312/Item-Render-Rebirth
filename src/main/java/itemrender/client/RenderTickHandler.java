@@ -10,10 +10,9 @@
 package itemrender.client;
 
 
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.TickEvent;
 import itemrender.client.keybind.KeybindRenderInventoryBlock;
-import net.minecraft.client.renderer.GlStateManager;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.TickEvent;
 import org.lwjgl.opengl.GL11;
 
 public class RenderTickHandler {
@@ -43,7 +42,7 @@ public class RenderTickHandler {
                 GL11.glEnd();
 
                 // Restore old texture
-                GlStateManager.bindTexture(originalTexture);
+                GL11.glBindTexture(GL11.GL_TEXTURE_2D, originalTexture);
             }
     }
 }

@@ -13,13 +13,11 @@ package itemrender.client.export;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.block.model.IBakedModel;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.creativetab.CreativeTabs;
+import net.minecraft.client.gui.inventory.GuiContainer;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.EnumChatFormatting;
+import net.minecraft.util.IIcon;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,27 +33,28 @@ public class ItemList {
     /**
      * Fields are replaced atomically and contents never modified.
      */
-    static volatile List<ItemStack> items = new ArrayList<ItemStack>();
+    public static volatile List<ItemStack> items = new ArrayList<ItemStack>();
+    /**
+     * Fields are replaced atomically and contents never modified.
+     */
+    public static volatile ListMultimap<Item, ItemStack> itemMap = ArrayListMultimap.create();
 
     private static void damageSearch(Item item, List<ItemStack> permutations) {
         HashSet<String> damageIconSet = new HashSet<String>();
-        for (int damage = 0; damage < 16; damage++)
-            try {
-                ItemStack stack = new ItemStack(item, 1, damage);
-                IBakedModel model = Minecraft.getMinecraft().getRenderItem().getItemModelMesher().getItemModel(stack);
-                String name = concatenatedDisplayName(stack);
-                String s = name + "@" + (model == null ? 0 : model.hashCode());
-                if (!damageIconSet.contains(s)) {
-                    damageIconSet.add(s);
-                    permutations.add(stack);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
+        for (int damage = 0; damage < 16; damage++) {
+            ItemStack itemstack = new ItemStack(item, 1, damage);
+            IIcon icon = item.getIconIndex(itemstack);
+            String name = concatenatedDisplayName(itemstack);
+            String s = name + "@" + (icon == null ? 0 : icon.hashCode());
+            if (!damageIconSet.contains(s)) {
+                damageIconSet.add(s);
+                permutations.add(itemstack);
             }
+        }
     }
 
-    private static String concatenatedDisplayName(ItemStack itemstack) {
-        List<String> list = itemDisplayNameMultiline(itemstack);
+    public static String concatenatedDisplayName(ItemStack itemstack) {
+        List<String> list = itemDisplayNameMultiline(itemstack, null);
         StringBuilder sb = new StringBuilder();
         boolean first = true;
         for (String name : list) {
@@ -66,16 +65,14 @@ public class ItemList {
             }
             sb.append(name);
         }
-        return TextFormatting.getTextWithoutFormattingCodes(sb.toString());
+        return EnumChatFormatting.getTextWithoutFormattingCodes(sb.toString());
     }
 
     @SuppressWarnings("unchecked")
-    private static List<String> itemDisplayNameMultiline(ItemStack itemstack) {
+    public static List<String> itemDisplayNameMultiline(ItemStack itemstack, GuiContainer gui) {
         List<String> nameList = null;
-        try {
-            nameList = itemstack.getTooltip(Minecraft.getMinecraft().player, ITooltipFlag.TooltipFlags.NORMAL);
-        } catch (Throwable ignored) {
-        }
+
+        nameList = itemstack.getTooltip(Minecraft.getMinecraft().thePlayer, false);
 
         if (nameList == null)
             nameList = new ArrayList<String>();
@@ -96,10 +93,10 @@ public class ItemList {
     @SuppressWarnings("unchecked")
     public static void updateList() {
         LinkedList<ItemStack> items = new LinkedList<ItemStack>();
-        NonNullList<ItemStack> permutations = NonNullList.create();
+        LinkedList<ItemStack> permutations = new LinkedList<ItemStack>();
         ListMultimap<Item, ItemStack> itemMap = ArrayListMultimap.create();
 
-        for (Item item : Item.REGISTRY) {
+        for (Item item : (Iterable<Item>) Item.itemRegistry) {
 
             if (item == null)
                 continue;
@@ -108,9 +105,7 @@ public class ItemList {
                 permutations.clear();
 
                 if (permutations.isEmpty())
-//                    item.getSubItems(null, permutations);
-                    for (CreativeTabs tab : item.getCreativeTabs())
-                        item.getSubItems(tab, permutations);
+                    item.getSubItems(item, null, permutations);
 
                 if (permutations.isEmpty())
                     damageSearch(item, permutations);
@@ -124,5 +119,6 @@ public class ItemList {
         }
 
         ItemList.items = items;
+        ItemList.itemMap = itemMap;
     }
 }

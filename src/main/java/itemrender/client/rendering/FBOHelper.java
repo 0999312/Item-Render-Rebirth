@@ -11,7 +11,6 @@ package itemrender.client.rendering;
 
 import itemrender.ItemRenderMod;
 import net.minecraft.client.renderer.GLAllocation;
-import net.minecraft.client.renderer.GlStateManager;
 import org.apache.commons.codec.binary.Base64;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.opengl.EXTFramebufferObject;
@@ -27,10 +26,10 @@ import java.io.IOException;
 import java.nio.IntBuffer;
 
 public final class FBOHelper {
-    private int renderTextureSize = 128;
-    private int framebufferID = -1;
-    private int depthbufferID = -1;
-    private int textureID = -1;
+    public int renderTextureSize = 128;
+    public int framebufferID = -1;
+    public int depthbufferID = -1;
+    public int textureID = -1;
 
     private IntBuffer lastViewport;
     private int lastTexture;
@@ -48,8 +47,8 @@ public final class FBOHelper {
         createFramebuffer();
     }
 
-    void begin() {
-        checkGlErrors("FBO Begin Init");
+    public void begin() {
+		checkGlErrors("FBO Begin Init");
 
         // Remember current framebuffer.
         lastFramebuffer = GL11.glGetInteger(EXTFramebufferObject.GL_FRAMEBUFFER_BINDING_EXT);
@@ -62,34 +61,33 @@ public final class FBOHelper {
         GL11.glGetInteger(GL11.GL_VIEWPORT, lastViewport);
         GL11.glViewport(0, 0, renderTextureSize, renderTextureSize);
 
-        GlStateManager.matrixMode(GL11.GL_MODELVIEW);
-        GlStateManager.pushMatrix();
-        GlStateManager.loadIdentity();
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPushMatrix();
+        GL11.glLoadIdentity();
 
         // Remember current texture.
         lastTexture = GL11.glGetInteger(GL11.GL_TEXTURE_BINDING_2D);
 
-        GlStateManager.clearColor(0, 0, 0, 0);
-        GlStateManager.clear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
+        GL11.glClearColor(0, 0, 0, 0);
+        GL11.glClear(GL11.GL_COLOR_BUFFER_BIT | GL11.GL_DEPTH_BUFFER_BIT);
 
-        GlStateManager.cullFace(GlStateManager.CullFace.FRONT);
-        GlStateManager.enableDepth();
-        GlStateManager.enableLighting();
-        GlStateManager.enableRescaleNormal();
+        GL11.glCullFace(GL11.GL_FRONT);
+        GL11.glEnable(GL11.GL_DEPTH_TEST);
+        GL11.glEnable(GL11.GL_LIGHTING);
+        GL11.glEnable(GL12.GL_RESCALE_NORMAL);
 
         checkGlErrors("FBO Begin Final");
     }
 
-    void end() {
+    public void end() {
         checkGlErrors("FBO End Init");
 
-        GlStateManager.cullFace(GlStateManager.CullFace.BACK);
-        GlStateManager.disableDepth();
-        GlStateManager.disableRescaleNormal();
-        GlStateManager.disableLighting();
+        GL11.glCullFace(GL11.GL_BACK);
+        GL11.glDisable(GL12.GL_RESCALE_NORMAL);
+        GL11.glDisable(GL11.GL_LIGHTING);
 
-        GlStateManager.matrixMode(GL11.GL_MODELVIEW);
-        GlStateManager.popMatrix();
+        GL11.glMatrixMode(GL11.GL_MODELVIEW);
+        GL11.glPopMatrix();
 
         // Revert to last viewport
         GL11.glViewport(lastViewport.get(0), lastViewport.get(1), lastViewport.get(2), lastViewport.get(3));
@@ -98,24 +96,24 @@ public final class FBOHelper {
         EXTFramebufferObject.glBindFramebufferEXT(EXTFramebufferObject.GL_FRAMEBUFFER_EXT, lastFramebuffer);
 
         // Revert to last texture
-        GlStateManager.bindTexture(lastTexture);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, lastTexture);
 
         checkGlErrors("FBO End Final");
     }
 
     public void bind() {
-        GlStateManager.bindTexture(textureID);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
     }
 
     // This is only a separate function because the texture gets messed with
     // after you're done rendering to read the FBO
-    void restoreTexture() {
-        GlStateManager.bindTexture(lastTexture);
+    public void restoreTexture() {
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, lastTexture);
     }
 
-    void saveToFile(File file) {
+    public void saveToFile(File file) {
         // Bind framebuffer texture
-        GlStateManager.bindTexture(textureID);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 
         GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
@@ -140,9 +138,9 @@ public final class FBOHelper {
         }
     }
 
-    String getBase64() {
+    public String getBase64() {
         // Bind framebuffer texture
-        GlStateManager.bindTexture(textureID);
+        GL11.glBindTexture(GL11.GL_TEXTURE_2D, textureID);
 
         GL11.glPixelStorei(GL11.GL_PACK_ALIGNMENT, 1);
         GL11.glPixelStorei(GL11.GL_UNPACK_ALIGNMENT, 1);
@@ -209,7 +207,7 @@ public final class FBOHelper {
         EXTFramebufferObject.glDeleteRenderbuffersEXT(depthbufferID);
     }
 
-    private static void checkGlErrors(String message) {
+    public static void checkGlErrors(String message) {
         int error = GL11.glGetError();
 
         if (error != 0) {

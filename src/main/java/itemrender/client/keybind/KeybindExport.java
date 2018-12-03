@@ -10,14 +10,14 @@
 
 package itemrender.client.keybind;
 
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent;
 import itemrender.client.export.ExportUtils;
+import itemrender.client.rendering.FBOHelper;
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import org.lwjgl.input.Keyboard;
 
 import java.io.IOException;
@@ -29,14 +29,15 @@ import java.io.IOException;
  */
 public class KeybindExport {
     public final KeyBinding key;
+    public FBOHelper fbo;
 
     public KeybindExport() {
-        key = new KeyBinding(I18n.format("itemrender.key.export"), Keyboard.KEY_I, "Item Render");
+        key = new KeyBinding("Export Mods", Keyboard.KEY_I, "Item Render");
         ClientRegistry.registerKeyBinding(key);
     }
 
     @SubscribeEvent
-    public void onKeyInput(InputEvent.KeyInputEvent event) throws IllegalAccessException, Throwable {
+    public void onKeyInput(InputEvent.KeyInputEvent event) {
         if (FMLClientHandler.instance().isGUIOpen(GuiChat.class))
             return;
         if (key.isPressed()) {

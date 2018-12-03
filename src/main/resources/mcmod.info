@@ -1,13 +1,13 @@
 [
 {
-  "modid": "itemrender",
+  "modid": "ItemRender",
   "name": "Item Render",
-  "description": "Item Render 1.12.x Edition",
+  "description": "Item Render 1.7.10 Edition",
   "version": "${version}",
   "mcversion": "${mcversion}",
   "url": "https://github.com/MascusJeoraly/Item-Render",
   "updateUrl": "",
-  "authorList": ["Kobata", "Meow J"],
+  "authorList": ["Meow J", "Kobata"],
   "credits": "Mascus Jeoraly",
   "logoFile": "",
   "screenshots": [],

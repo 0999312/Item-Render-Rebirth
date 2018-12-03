@@ -10,14 +10,13 @@
 package itemrender.client.keybind;
 
 
+import cpw.mods.fml.client.FMLClientHandler;
+import cpw.mods.fml.client.registry.ClientRegistry;
+import cpw.mods.fml.common.eventhandler.SubscribeEvent;
+import cpw.mods.fml.common.gameevent.InputEvent;
 import itemrender.client.RenderTickHandler;
 import net.minecraft.client.gui.GuiChat;
-import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraftforge.fml.client.FMLClientHandler;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
-import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
-import net.minecraftforge.fml.common.gameevent.InputEvent;
 import org.lwjgl.input.Keyboard;
 
 public class KeybindToggleRender {
@@ -25,7 +24,7 @@ public class KeybindToggleRender {
     public final KeyBinding key;
 
     public KeybindToggleRender() {
-        key = new KeyBinding(I18n.format("itemrender.key.toggle"), Keyboard.KEY_O, "Item Render");
+        key = new KeyBinding("Toggle Render", Keyboard.KEY_O, "Item Render");
         ClientRegistry.registerKeyBinding(key);
     }
 
