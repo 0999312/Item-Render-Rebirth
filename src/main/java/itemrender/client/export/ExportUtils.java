@@ -2,21 +2,17 @@ package itemrender.client.export;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import cpw.mods.fml.client.FMLClientHandler;
-import cpw.mods.fml.common.registry.EntityRegistry;
-import cpw.mods.fml.common.registry.EntityRegistry.EntityRegistration;
-import cpw.mods.fml.common.registry.GameRegistry;
-import cpw.mods.fml.common.registry.GameRegistry.UniqueIdentifier;
 import itemrender.ItemRenderMod;
 import itemrender.client.rendering.FBOHelper;
 import itemrender.client.rendering.Renderer;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.entity.RenderItem;
@@ -24,18 +20,22 @@ import net.minecraft.client.resources.I18n;
 import net.minecraft.client.resources.Language;
 import net.minecraft.client.resources.LanguageManager;
 import net.minecraft.client.settings.GameSettings;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityList;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemBlock;
 import net.minecraft.item.ItemStack;
+import net.minecraftforge.fml.client.FMLClientHandler;
+import net.minecraftforge.fml.common.registry.GameRegistry;
+import net.minecraftforge.fml.common.registry.GameRegistry.UniqueIdentifier;
 import org.apache.logging.log4j.Logger;
 
 public class ExportUtils
 {
-  public static ExportUtils INSTANCE;
+	private Thread item;
+    public static ExportUtils INSTANCE;
+    private int progress=1,size;
   private FBOHelper fboSmall;
   private FBOHelper fboLarge;
-  private RenderItem itemRenderer = new RenderItem();
+  private RenderItem itemRenderer = Minecraft.getMinecraft().getRenderItem();
   private List<ItemData> itemDataList = new ArrayList();
   
   public ExportUtils()
@@ -48,6 +48,7 @@ public class ExportUtils
   {
     return itemStack.getDisplayName();
   }
+  
   public String getType(ItemStack itemStack)
   {
     return (itemStack.getItem() instanceof ItemBlock) ? "Block" : "Item";
@@ -63,78 +64,88 @@ public class ExportUtils
     return Renderer.getItemBase64(itemStack, this.fboLarge, this.itemRenderer);
   }
   
-  public String getItemOwner(ItemStack itemStack)
+  private String getItemOwner(ItemStack itemStack)
   {
     GameRegistry.UniqueIdentifier uniqueIdentity = GameRegistry.findUniqueIdentifierFor(itemStack.getItem());
     return uniqueIdentity == null ? "unnamed" : uniqueIdentity.modId;
   }
   
-  public void exportMods() throws IOException {
-      Minecraft minecraft = FMLClientHandler.instance().getClient();
-      itemDataList.clear();
-      List<String> modList = new ArrayList<String>();
-      Language lang = minecraft.getLanguageManager().getCurrentLanguage();
-      
-      Gson gson = new GsonBuilder().disableHtmlEscaping().create();
-      ItemData itemData;
-      String identifier;
-
-      for (ItemStack itemStack : ItemList.items) {
-          if (itemStack == null) continue;
-          if (getItemOwner(itemStack).equals("minecraft") && !ItemRenderMod.exportVanillaItems) continue;
-
-          identifier = itemStack.getUnlocalizedName() + "@" + itemStack.getItemDamage();
-          if (ItemRenderMod.blacklist.contains(identifier)) continue;
-
-          itemData = new ItemData(itemStack);
-          itemDataList.add(itemData);
-          if (!modList.contains(getItemOwner(itemStack))) modList.add(getItemOwner(itemStack));
-      }
-      // Since refreshResources takes a long time, only refresh once for all the items
-      minecraft.getLanguageManager().setCurrentLanguage(new Language("zh_CN", "Ê∂ìÓÖûÊµó", "Áª†ÔøΩÊµ£Êí≤ËÖëÈèÇÔøΩ", false));
-      minecraft.gameSettings.language = "zh_CN";
-      minecraft.refreshResources();
-      minecraft.gameSettings.saveOptions();
-
-      for (ItemData data : itemDataList) {
-          if (ItemRenderMod.debugMode)
-              ItemRenderMod.instance.log.info("Adding Chinese name for " + data.getItemStack().getUnlocalizedName() + "@" + data.getItemStack().getItemDamage());
-          data.setName(this.getLocalizedName(data.getItemStack()));
-          data.setCreativeName(getCreativeTabName(data));
-      }
-
-      minecraft.getLanguageManager().setCurrentLanguage(new Language("en_US", "US", "English", false));
-      minecraft.gameSettings.language = "en_US";
-      minecraft.refreshResources();
-      minecraft.fontRenderer.setUnicodeFlag(false);
-      minecraft.gameSettings.saveOptions();
-
-      for (ItemData data : itemDataList) {
-          if (ItemRenderMod.debugMode)
-              ItemRenderMod.instance.log.info("Adding English name for " + data.getItemStack().getUnlocalizedName() + "@" + data.getItemStack().getItemDamage());
-          data.setEnglishName(this.getLocalizedName(data.getItemStack()));
-      }
-
-      File export;
-
-      for (String modid : modList) {
-          export = new File(minecraft.mcDataDir, String.format("export/"+modid+"_item.json", modid.replaceAll("[^A-Za-z0-9()\\[\\]]", "")));
-          if (!export.getParentFile().exists()) export.getParentFile().mkdirs();
-          if (!export.exists()) export.createNewFile();
-          PrintWriter pw = new PrintWriter(export, "UTF-8");
-
-          for (ItemData data : itemDataList) {
-              if (modid.equals(getItemOwner(data.getItemStack())))
-                  pw.println(gson.toJson(data));
+  public void exportMods()
+    throws IOException
+  {
+    Minecraft minecraft = FMLClientHandler.instance().getClient();
+    Language lang = minecraft.getLanguageManager().getCurrentLanguage();
+    this.itemDataList.clear();
+    List<String> modList = new ArrayList();
+    
+    Gson gson = new GsonBuilder().disableHtmlEscaping().create();
+    for (ItemStack itemStack : ItemList.items1) {
+      if ((itemStack != null) && (
+        (!getItemOwner(itemStack).equals("minecraft")) || (ItemRenderMod.exportVanillaItems)))
+      {
+        String identifier = itemStack.getItem().getUnlocalizedName() + "@" + itemStack.getMetadata();
+        if (!ItemRenderMod.blacklist.contains(identifier))
+        {
+          ItemData itemData = new ItemData(itemStack);
+          this.itemDataList.add(itemData);
+          if (!modList.contains(getItemOwner(itemStack))) {
+            modList.add(getItemOwner(itemStack));
           }
-          pw.close();
+        }
       }
-      
-      minecraft.getLanguageManager().setCurrentLanguage(lang);
-      minecraft.gameSettings.language = lang.getLanguageCode();
-      minecraft.refreshResources();
-      minecraft.gameSettings.saveOptions();
+    }
+    minecraft.getLanguageManager().setCurrentLanguage(new Language("zh_CN", "÷–π˙", "ºÚÃÂ÷–Œƒ", false));
+    minecraft.gameSettings.language = "zh_CN";
+    minecraft.refreshResources();
+    minecraft.gameSettings.saveOptions();
+    for (ItemData data : this.itemDataList)
+    {
+      if (ItemRenderMod.debugMode) {
+        ItemRenderMod.instance.log.info("Adding Chinese name for " + data.getItemStack().getItem().getUnlocalizedName() + "@" + data.getItemStack().getMetadata());
+      }
+      data.setName(getLocalizedName(data.getItemStack()));
+      data.setCreativeName(getCreativeTabName(data));
+    }
+    minecraft.getLanguageManager().setCurrentLanguage(new Language("en_US", "US", "English", false));
+    minecraft.gameSettings.language = "en_US";
+    minecraft.refreshResources();
+    minecraft.fontRendererObj.setUnicodeFlag(false);
+    minecraft.gameSettings.saveOptions();
+    
+    for (ItemData data : itemDataList) {
+        if (ItemRenderMod.debugMode)
+            ItemRenderMod.instance.log.info("Adding English name for " + data.getItemStack().getUnlocalizedName() + "@" + data.getItemStack().getItemDamage());
+        data.setEnglishName(this.getLocalizedName(data.getItemStack()));
+    }
+    ItemData data;
+    for (String modid : modList)
+    {
+      File export = new File(minecraft.mcDataDir, String.format("export/"+modid+"_item.json", new Object[] { modid.replaceAll("[^A-Za-z0-9()\\[\\]]", "") }));
+      if (!export.getParentFile().exists()) {
+        export.getParentFile().mkdirs();
+      }
+      if (!export.exists()) {
+        export.createNewFile();
+      }
+      PrintWriter pw = new PrintWriter(export, "UTF-8");
+      for (ItemData data1 : this.itemDataList) {
+        if (modid.equals(getItemOwner(data1.getItemStack()))) {
+          pw.println(gson.toJson(data1));
+        }
+      }
+      pw.close();
+    }
+    
+    minecraft.getLanguageManager().setCurrentLanguage(lang);
+    minecraft.gameSettings.language = lang.getLanguageCode();
+    minecraft.refreshResources();
+    minecraft.fontRendererObj.setUnicodeFlag(false);
+    minecraft.gameSettings.saveOptions();
+    
   }
+  
+
+  
 	private String getCreativeTabName(ItemData data) {
 		if(data.getItemStack().getItem().getCreativeTab()!=null){
 		return I18n.format(data.getItemStack().getItem().getCreativeTab().getTranslatedTabLabel(), new Object[0]);

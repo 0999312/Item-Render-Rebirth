@@ -12,9 +12,6 @@ import java.util.List;
 
 import org.apache.logging.log4j.Logger;
 
-import cpw.mods.fml.common.registry.GameData;
-import cpw.mods.fml.common.registry.GameRegistry;
-
 public class ItemData
 {
   private String name;
@@ -38,7 +35,7 @@ public class ItemData
     }
     this.name = null;
     this.englishName = null;
-    this.registerName = GameData.getItemRegistry().getNameForObject(itemStack.getItem());
+    this.registerName = itemStack.getItem().getRegistryName();
     List<String> list = new ArrayList<String>();
     metadata=itemStack.getItemDamage();
     if(!isEmpty(itemStack)){
