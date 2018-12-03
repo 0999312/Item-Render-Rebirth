@@ -11,9 +11,9 @@ package itemrender.client;
 
 
 import itemrender.client.keybind.KeybindRenderInventoryBlock;
+import net.minecraft.client.renderer.GlStateManager;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
 import net.minecraftforge.fml.common.gameevent.TickEvent;
-
 import org.lwjgl.opengl.GL11;
 
 public class RenderTickHandler {
@@ -43,7 +43,7 @@ public class RenderTickHandler {
                 GL11.glEnd();
 
                 // Restore old texture
-                GL11.glBindTexture(GL11.GL_TEXTURE_2D, originalTexture);
+                GlStateManager.bindTexture(originalTexture);
             }
     }
 }
