@@ -1,0 +1,20 @@
+itemrender.msg.clientonly=Item Render是一个客户端mod。请删除此mod并重启服务器。
+itemrender.msg.openglerror=OpenGL错误，请尝试升级驱动或系统。
+itemrender.msg.processing=正在处理%s
+itemrender.msg.addCN=正在为%s添加中文名
+
+itemrender.key.block=渲染方块（%d）
+itemrender.key.entity=渲染实体（%d）
+itemrender.key.toggle=切换渲染显示
+itemrender.key.export=导出所有Mod
+itemrender.key.currentplayer=渲染当前玩家
+itemrender.key.error=OpenGL错误
+
+itemrender.cfg.mainblock=导出主方块图像的大小
+itemrender.cfg.gridblock=导出缩略方块图像的大小
+itemrender.cfg.mainentity=导出主实体图像的大小
+itemrender.cfg.gridentity=导出缩略实体图像的大小
+itemrender.cfg.player=导出玩家图像的大小
+itemrender.cfg.vanilla=导出原版物品
+itemrender.cfg.debug=启用Debug模式
+itemrender.cfg.blacklist=导出黑名单。格式：unlocalizedName@metadata

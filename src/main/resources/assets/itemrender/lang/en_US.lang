@@ -1,0 +1,20 @@
+itemrender.msg.clientonly=Item Render is a client-only mod. Please remove this mod and restart your server.
+itemrender.msg.openglerror=OpenGL Error, please upgrade your drivers or system.
+itemrender.msg.processing=Processing %s
+itemrender.msg.addCN=Adding Chinese name for %s
+
+itemrender.key.block=Render Block(%d)
+itemrender.key.entity=Render Entity(%d)
+itemrender.key.toggle=Toggle Render
+itemrender.key.export=Export Mods
+itemrender.key.currentplayer=Render Current Player
+itemrender.key.error=OpenGL Error
+
+itemrender.cfg.mainblock=Main size of exported block image
+itemrender.cfg.gridblock=Grid size of exported block image
+itemrender.cfg.mainentity=Main size of exported entity image
+itemrender.cfg.gridentity=Grid size of exported entity image
+itemrender.cfg.player=Size of exported player image
+itemrender.cfg.vanilla=Export Vanilla items
+itemrender.cfg.debug=Enable debug mode
+itemrender.cfg.blacklist=Export blacklist. Format: unlocalizedName@metadata
